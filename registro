@@ -1,0 +1,141 @@
+#Importamos la libreria psycopg2
+import psycopg2
+
+# Función para establecer la conexión con la base de datos
+def conectar():
+    #excepciones el programa se ejecutara si no hay problemas
+    try:
+        connection = psycopg2.connect(
+            #variables
+            host="localhost",
+            database="Alumnos",
+            user="postgres",
+            password="_maria191"
+        )
+        return connection
+    #se mostrara un mensaje de error
+    except (Exception, psycopg2.Error) as error:
+        print("Error al conectar a la base de datos:", error)# se imprime un mensaje
+
+
+# Función para crear un nuevo estudiante
+def crear_estudiante():
+
+    # Se imprimiran los datos que se desean guardar
+    nombre = input("Ingrese el Nombre del Estudiante: ")# se imprime un mensaje
+    apellido = input("Ingrese el Apellido del Estudiante: ")# se imprime un mensaje
+    edad = int(input("Ingrese la Edad del Estudiante: "))# se imprime un mensaje
+
+    #Coccion con la base de datos
+    connection = conectar()
+    cursor = connection.cursor()
+    #excepciones el programa se ejecutara si no hay problemas
+    try:
+        query = "INSERT INTO estudiantes (nombre, apellido, edad) VALUES (%s, %s, %s)"
+        cursor.execute(query, (nombre, apellido, edad))
+        connection.commit()
+        print("Estudiante creado exitosamente")# se imprime un mensaje
+    #se mostrara un mensaje de error
+    except (Exception, psycopg2.Error) as error:
+        print("Error al crear el estudiante:", error)# se imprime un mensaje de error
+    finally:
+        cursor.close()
+        connection.close()
+
+# Función para leer los estudiantes existentes
+def leer_estudiantes():
+    connection = conectar()
+    cursor = connection.cursor()
+    #excepciones el programa se ejecutara si no hay problemas
+    try:
+        query = "SELECT * FROM estudiantes"
+        cursor.execute(query)
+        estudiantes = cursor.fetchall()
+        if len(estudiantes) > 0:
+            print("Lista de estudiantes:")# se imprime un mensaje
+            for estudiante in estudiantes:
+                print(f"ID: {estudiante[0]}, Nombre: {estudiante[1]}, Apellido: {estudiante[2]}, Edad: {estudiante[3]}")
+        else:
+            print("No se encontraron estudiantes")# se imprime un mensaje
+    #se mostrara un mensaje de error
+    except (Exception, psycopg2.Error) as error:
+        print("Error al leer los estudiantes:", error)# se imprime un mensaje de error
+    finally:
+        cursor.close()
+        connection.close()
+
+# Función para actualizar un estudiante existente
+def actualizar_estudiante():
+    id_estudiante = int(input("Ingrese el ID del estudiante que desea actualizar: "))# se imprime un mensaje
+    nombre = input("Ingrese el nuevo nombre del estudiante: ")# se imprime un mensaje
+    apellido = input("Ingrese el nuevo apellido del estudiante: ")# se imprime un mensaje
+    edad = int(input("Ingrese la nueva edad del estudiante: "))# se imprime un mensaje
+
+    connection = conectar()
+    cursor = connection.cursor()
+    #excepciones el programa se ejecutara si no hay problemas
+    try:
+        query = "UPDATE estudiantes SET nombre = %s, apellido = %s, edad = %s WHERE id = %s"
+        cursor.execute(query, (nombre, apellido, edad, id_estudiante))
+        connection.commit()
+        if cursor.rowcount > 0:
+            print("Estudiante actualizado exitosamente")# se imprime un mensaje
+        else:
+            print("No se encontró el estudiante con el ID proporcionado")# se imprime un mensaje
+    #se mostrara un mensaje de error
+    except (Exception, psycopg2.Error) as error:
+        print("Error al actualizar el estudiante:", error)# se imprime un mensaje de error
+    finally:
+        cursor.close()
+        connection.close()
+
+# Función para eliminar un estudiante existente
+def eliminar_estudiante():
+    id_estudiante = int(input("Ingrese el ID del estudiante que desea eliminar: "))# se imprime un mensaje
+
+    connection = conectar()
+    cursor = connection.cursor()
+    #excepciones el programa se ejecutara si no hay problemas
+    try:
+        query = "DELETE FROM estudiantes WHERE id = %s"
+        cursor.execute(query, (id_estudiante,))
+        connection.commit()
+        if cursor.rowcount > 0:
+            print("Estudiante eliminado exitosamente")# se imprime un mensaje
+        else:
+            print("No se encontró el estudiante con el ID proporcionado")# se imprime un mensaje
+    #se mostrara un mensaje de error
+    except (Exception, psycopg2.Error) as error:
+        print("Error al eliminar el estudiante:", error)# se imprime un mensaje de error
+    finally:
+        cursor.close()
+        connection.close()
+
+# Función para mostrar el menú de opciones
+def mostrar_menu():
+    while True:
+        print("\n---------MENÚ ---------")# se imprime un mensaje
+        print("1. Crear un nuevo estudiante")# se imprime un mensaje
+        print("2. Leer los estudiantes existentes")# se imprime un mensaje
+        print("3. Actualizar un estudiante existente")# se imprime un mensaje
+        print("4. Eliminar un estudiante existente")# se imprime un mensaje
+        print("5. Salir del programa")# se imprime un mensaje
+        opcion = input("Ingrese el número de la opción que desea realizar: ")# se imprime un mensaje de error
+        
+        if opcion == "1":
+            crear_estudiante()
+        elif opcion == "2":
+            leer_estudiantes()
+        elif opcion == "3":
+            actualizar_estudiante()
+        elif opcion == "4":
+            eliminar_estudiante()
+        elif opcion == "5":
+            print("¡Hasta lego!")
+            break
+        else:
+            print("Opción inválida. Por favor, ingrese un número válido.")# se imprime un mensaje
+
+
+# Llamada a la función para mostrar el menú de opciones
+mostrar_menu()
